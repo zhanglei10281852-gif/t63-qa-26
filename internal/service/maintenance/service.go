@@ -94,12 +94,11 @@ func (s Service) Complete(ctx context.Context, id, actor, request string) (maint
 			return err
 		}
 		previous := vehicleItem
-		released, err := vehicleItem.ReleaseMaintenance(now)
+		vehicleItem, err = vehicleItem.ReleaseMaintenance(now)
 		if err != nil {
 			return err
 		}
-		vehicleItem = released
-		if err := tx.SaveVehicle(ctx, previous, previous.Version); err != nil {
+		if err := tx.SaveVehicle(ctx, vehicleItem, previous.Version); err != nil {
 			return err
 		}
 		return tx.AppendAudit(ctx, audit.Event{ID: s.IDs.NewID("audit"), ActorID: actor, EntityType: "maintenance", EntityID: id, Action: "complete", Result: "success", RequestID: request, Metadata: map[string]any{}, CreatedAt: now})
